@@ -2,7 +2,6 @@
   "name": "k8s.d",
   "version": "1.30.0",
   "description": "Generate TypeScript definitions of Kubernetes resource types",
-  "main": "dist/index.js",
   "repository": "https://github.com/yankeguo/k8s.d",
   "author": "Yan-Ke Guo <hi@yankeguo.com>",
   "license": "Apache-2.0",

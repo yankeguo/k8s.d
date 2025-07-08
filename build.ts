@@ -581,12 +581,18 @@ async function main(): Promise<void> {
 
   for (const {filePath, text} of generatedFiles) {
     const destFilePath = path.join(destinationPath, filePath.replace(/^\//, ''))
-    mkdirSync(path.dirname(destFilePath), { recursive: true })
+    mkdirSync(path.dirname(destFilePath), {recursive: true})
     writeFileSync(destFilePath, text, 'utf8')
     console.log(`Generated: ${apiVersion}${filePath}`)
   }
 
   console.log(`Successfully generated types for Kubernetes ${apiVersion}`)
+
+  delete pkg.scripts
+  delete pkg.devDependencies
+  delete pkg.dependencies
+
+  writeFileSync(path.join(__dirname, 'dist', 'package.json'), JSON.stringify(pkg, null, 2), 'utf8')
 }
 
 // Execute main function
