@@ -1,36 +1,63 @@
-# kubernetes-types
+# k8s.d
 
-This package provides TypeScript definitions for Kubernetes API types, generated from the Kubernetes OpenAPI definitions.
+TypeScript definitions for Kubernetes manifests with full type safety and autocompletion support.
 
-## Example
+## Installation
+
+```bash
+npm install k8s.d
+# or
+yarn add k8s.d
+```
+
+## Usage
+
+`k8s.d` provides TypeScript types for all Kubernetes resources, allowing you to define your Kubernetes manifests with full type safety and IDE autocompletion.
+
+### Example
 
 ```typescript
-import {Pod} from 'kubernetes-types/core/v1'
-import {ObjectMeta} from 'kubernetes-types/meta/v1'
+import {Service} from 'k8s.d/core/v1'
 
-let metadata: ObjectMeta = {name: 'example', labels: {app: 'example'}}
-let pod: Pod = {
+export const myService: Service = {
   apiVersion: 'v1',
-  kind: 'Pod', // 'v1' and 'Pod' are the only accepted values for a Pod
-
-  metadata,
-
+  kind: 'Service',
+  metadata: {
+    name: 'my-service',
+  },
   spec: {
-    containers: [
-      /* ... */
-    ],
+    selector: {
+      app: 'my-app',
+    },
   },
 }
 ```
 
-## Versioning
+### Benefits
 
-As an NPM package, kubernetes-types follows semver. The major and minor version of the package will track the Kubernetes API version, while the patch version will follow updates to the generated types.
+- Full TypeScript support with type checking
+- IDE autocompletion for all Kubernetes resource fields
+- Catch configuration errors at compile time
+- Better maintainability and documentation through types
 
-You should install the version of the types matching the Kubernetes API version you want to be compatible with. Consult [NPM][versions] for the list of available versions of this package.
+### Available Resources
 
-[versions]: https://www.npmjs.com/package/kubernetes-types?activeTab=versions
+The package includes TypeScript definitions for all Kubernetes resources, organized by API groups:
 
-## This repository
+- `core/v1`: Core resources like Pod, Service, ConfigMap, etc.
+- `apps/v1`: Deployment, StatefulSet, DaemonSet, etc.
+- `networking.k8s.io/v1`: Ingress, NetworkPolicy, etc.
+- And many more...
 
-This repository contains the code used to generate the TypeScript types, not the types themselves.
+## Development
+
+To build the project:
+
+```bash
+npm install
+npm run build
+```
+
+## License
+
+MIT License

@@ -4,10 +4,10 @@
   "description": "Generate TypeScript definitions of Kubernetes resource types",
   "repository": "https://github.com/yankeguo/k8s.d",
   "author": "Yan-Ke Guo <hi@yankeguo.com>",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "build": "rimraf dist && tsx build.ts",
-    "format": "prettier --write **/*"
+    "format": "prettier --write **/*.{ts,md,json}"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
