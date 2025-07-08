@@ -1,14 +1,14 @@
 {
-  "name": "kubernetes-type-generator",
+  "name": "k8s-definitions-generator",
   "version": "0.1.0",
   "description": "Generate TypeScript definitions of Kubernetes resource types",
-  "type": "module",
-  "module": "lib/generate/index.mjs",
-  "repository": "https://github.com/silverlyra/kubernetes-types",
-  "author": "Lyra Naeseth <lyra@naeseth.com>",
+  "main": "dist/index.js",
+  "repository": "https://github.com/yankeguo/k8s.d",
+  "author": "Yan-Ke Guo <hi@yankeguo.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc",
+    "format": "prettier --write **/*"
   },
   "dependencies": {
     "argparse": "^1.0.10",
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/argparse": "^1.0.35",
     "@types/node": "^20.12.12",
-    "prettier": "^1.15.3",
+    "prettier": "^1.19.1",
     "typescript": "^5.0.0"
   }
 }
