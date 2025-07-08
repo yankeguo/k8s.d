@@ -5,10 +5,7 @@
  * This tool fetches Kubernetes API schemas and converts them into well-typed TypeScript definitions.
  */
 
-import {ArgumentParser} from 'argparse'
-import {readFileSync, writeFileSync} from 'fs'
-import {sync as mkdirpSync} from 'mkdirp'
-import fetch from 'node-fetch'
+import {readFileSync, writeFileSync, mkdirSync} from 'fs'
 import * as path from 'path'
 import {
   Project,
@@ -189,26 +186,6 @@ function normalizeVersion(version: string): string {
   }
 
   return normalizedVersion
-}
-
-/**
- * Generates a release version string
- * @param apiVersion The Kubernetes API version
- * @param options Release options including patch and beta numbers
- * @returns The formatted release version
- */
-function generateReleaseVersion(
-  apiVersion: string,
-  {patch, beta}: Pick<Arguments, 'patch' | 'beta'>
-): string {
-  const [major, minor] = apiVersion.replace(/^v/, '').split('.')
-  let version = `${major}.${minor}.${patch}`
-
-  if (beta) {
-    version += `-beta.${beta}`
-  }
-
-  return version
 }
 
 /**
@@ -567,30 +544,19 @@ async function fetchKubernetesAPI(version: string): Promise<API> {
 // CLI Logic
 // ============================================================================
 
-/** Command line arguments interface */
-interface Arguments {
-  api: string
-  file: string | undefined
-  patch: number
-  beta: number | undefined
-}
-
 /**
  * Main CLI function
- * @param args Parsed command line arguments
  */
-async function main(args: Arguments): Promise<void> {
-  const {api: apiVersionArg, file, patch, beta} = args
-  const apiVersion = normalizeVersion(apiVersionArg)
+async function main(): Promise<void> {
+  const pkg = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
+  const apiVersion = normalizeVersion(pkg.version)
 
   console.log(`Generating types for Kubernetes API version: ${apiVersion}`)
 
   // Load API specification
-  const api: API = file
-    ? JSON.parse(readFileSync(file, 'utf8'))
-    : await fetchKubernetesAPI(apiVersion)
+  const api: API = await fetchKubernetesAPI(apiVersion)
 
-  console.log(`Loaded API specification: ${api.info.title} v${api.info.version}`)
+  console.log(`Loaded API specification: ${api.info.title} ${api.info.version}`)
 
   // Create TypeScript project
   const project = new Project({
@@ -609,74 +575,23 @@ async function main(args: Arguments): Promise<void> {
   const generatedFiles = emitResult.getFiles()
 
   // Write files to disk
-  const version = generateReleaseVersion(apiVersion, {patch, beta})
-  const destinationPath = path.normalize(path.join(__dirname, '..', 'out'))
+  const destinationPath = path.normalize(path.join(__dirname, 'dist'))
 
   console.log(`Writing ${generatedFiles.length} files to ${destinationPath}`)
 
   for (const {filePath, text} of generatedFiles) {
     const destFilePath = path.join(destinationPath, filePath.replace(/^\//, ''))
-    mkdirpSync(path.dirname(destFilePath))
+    mkdirSync(path.dirname(destFilePath), { recursive: true })
     writeFileSync(destFilePath, text, 'utf8')
-    console.log(`Generated: v${version}${filePath}`)
+    console.log(`Generated: ${apiVersion}${filePath}`)
   }
 
-  // Generate package.json
-  const packageJson = {
-    name: 'k8s.d',
-    version,
-    description: 'TypeScript definitions of Kubernetes resource types',
-    repository: 'https://github.com/yankeguo/k8s.d',
-    author: 'Yan-Ke Guo <hi@yankeguo.com>',
-    license: 'MIT',
-    devDependencies: {
-      typescript: '>=3.2.0',
-    },
-  }
-
-  writeFileSync(
-    path.join(destinationPath, 'package.json'),
-    JSON.stringify(packageJson, null, 2),
-    'utf8'
-  )
-
-  console.log(`Successfully generated types for Kubernetes v${version}`)
+  console.log(`Successfully generated types for Kubernetes ${apiVersion}`)
 }
 
-// ============================================================================
-// CLI Setup and Execution
-// ============================================================================
-
-const parser = new ArgumentParser({
-  description: 'Generate TypeScript types for the Kubernetes API',
-  prog: 'kubernetes-types-generator',
-})
-
-parser.addArgument(['-a', '--api'], {
-  help: 'Kubernetes API version (e.g., "1.28", "v1.28.0", "master")',
-  defaultValue: 'master',
-})
-
-parser.addArgument(['-f', '--file'], {
-  help: 'Path to local swagger.json file (alternative to fetching from GitHub)',
-})
-
-parser.addArgument(['-p', '--patch'], {
-  help: 'Patch version number for generated types',
-  type: Number,
-  defaultValue: 0,
-})
-
-parser.addArgument(['--beta'], {
-  help: 'Beta version number for creating beta releases',
-  type: Number,
-})
-
 // Execute main function
-main(parser.parseArgs()).catch((error: Error) => {
+main().catch((error: Error) => {
   console.error('Error:', error.message)
-  if (process.env.NODE_ENV === 'development') {
-    console.error(error.stack)
-  }
+  console.error(error.stack)
   process.exit(1)
 })
