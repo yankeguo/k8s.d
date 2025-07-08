@@ -593,6 +593,10 @@ async function main(): Promise<void> {
   delete pkg.dependencies
 
   writeFileSync(path.join(__dirname, 'dist', 'package.json'), JSON.stringify(pkg, null, 2), 'utf8')
+
+  writeFileSync(path.join(__dirname, 'dist', 'README.md'), readFileSync(path.join(__dirname, 'README.md'), 'utf8'), 'utf8')
+
+  writeFileSync(path.join(__dirname, 'dist', 'LICENSE'), readFileSync(path.join(__dirname, 'LICENSE'), 'utf8'), 'utf8')
 }
 
 // Execute main function
